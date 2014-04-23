@@ -1,0 +1,48 @@
+---
+# Prereqs
+- name: create redis group
+  group: name=redis state=present
+- name: create redis user
+  user: name=redis state=present createhome=no shell=/bin/false group=redis
+- name: create redis data directory
+  file: dest={{ redis_base_data_dir }}/redis state=directory owner=redis group=redis
+  notify:
+    - restart redis
+
+# Online install - Currently Unavailable
+#- name: online install | download redis
+#  get_url: url=http://tbc/redis-{{ redis_version }}.tar.gz dest=/var/tmp/redis-{{ redis_version }}.tar.gz
+#- name: online install | extract redis installation
+#  unarchive: src=/var/tmp/redis-{{ redis_version }}.tar.gz copy=no dest={{ redis_base_install_dir }}/ mode=0700 creates={{ redis_base_install_dir }}/redis-{{ redis_version }}/bin/redis
+#  notify:
+#    - restart redis
+#  when: redis_online_install
+
+# Offline Install
+- name: offline install | copy and extract redis installation
+  unarchive: src={{ redis_installer_path }}/redis-{{ redis_version }}.tar.gz dest={{ redis_base_install_dir}}/ mode=0700 creates={{ redis_base_install_dir}}/redis-{{ redis_version }}/redis-server
+  notify:
+    - restart redis
+  when: not redis_online_install
+
+# Configure
+- name: install redis startup script
+  template: src=redis-sysvinit.j2 dest=/etc/init.d/redis owner=root group=root mode=0755
+  notify:
+    - restart redis
+- name: install redis configuration
+  template: src=redis.conf.j2 dest={{ redis_base_install_dir}}/redis-{{ redis_version }}/redis.conf owner=redis group=redis mode=0755
+  notify:
+    - restart redis
+# Prepare runtime
+- name: create redis run directory
+  file: dest=/var/run/redis state=directory owner=redis group=redis
+- name: grant directory permissions to redis user for installation directory
+  file: path={{ redis_base_install_dir}}/redis-{{ redis_version }} owner=redis group=redis recurse=true
+- name: create redis logs directory
+  file: dest={{ redis_base_logs_dir }}/redis state=directory owner=redis group=redis
+- name: create symlink to redis installation
+  file: src={{ redis_base_install_dir}}/redis-{{ redis_version }} path={{ redis_base_install_dir}}/redis state=link
+# Ensure redis is started
+- name: ensure redis is started and starts on boot
+  service: name=redis state=started enabled=yes
