@@ -20,7 +20,7 @@
 
 # Offline Install
 - name: offline install | copy and extract redis installation
-  unarchive: src={{ redis_installer_path }}/redis-{{ redis_version }}.tar.gz dest={{ redis_base_install_dir}}/ mode=0700 creates={{ redis_base_install_dir}}/redis-{{ redis_version }}/redis-server
+  unarchive: src={{ redis_installer_path }} dest={{ redis_base_install_dir}}/ mode=0700 creates={{ redis_base_install_dir}}/redis-{{ redis_version }}/redis-server
   notify:
     - restart redis
   when: not redis_online_install
