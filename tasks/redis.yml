@@ -42,7 +42,7 @@
 - name: create redis logs directory
   file: dest={{ redis_base_logs_dir }}/redis state=directory owner=redis group=redis
 - name: create symlink to redis installation
-  file: src={{ redis_base_install_dir}}/redis-{{ redis_version }} path={{ redis_base_install_dir}}/redis state=link
+  file: src={{ redis_base_install_dir}}/redis-{{ redis_version }} path={{ redis_base_install_dir}}/redis state=link force=yes
 # Ensure redis is started
 - name: ensure redis is started and starts on boot
   service: name=redis state=started enabled=yes
