@@ -25,6 +25,10 @@
     - restart redis
   when: not redis_online_install
 
+# Generate teardown
+- name: generate teardown script
+  template: src=teardown_redis.sh.j2 dest={{ redis_base_install_dir }}/teardown_redis_{{ redis_version }}.sh owner=root group=root mode=0750
+
 # Configure
 - name: install redis startup script
   template: src=redis-sysvinit.j2 dest=/etc/init.d/redis owner=root group=root mode=0755

@@ -1,0 +1,72 @@
+#!/bin/bash
+check_running () {
+        APP_RUNNING=`ps -ef | grep redis-{{ redis_version }}/redis-server | grep -v grep | wc -l`
+        return $APP_RUNNING
+}
+kill_by_path () {
+        SIGNAL=$1
+        ps -ef | grep redis-{{ redis_version }}/redis-server | grep -v grep | awk '{print $2}' | xargs kill $SIGNAL
+}
+check_running
+RUNNING=$?
+if [ $RUNNING -gt 0 ]; then
+        if [ -f /etc/init.d/redis ]; then
+                echo "Stopping redis with rc script"
+                /etc/init.d/redis stop && sleep 5
+        fi
+fi
+check_running
+RUNNING=$?
+if [ $RUNNING -gt 0 ]; then
+        echo "Stopping redis with TERM signal"
+        kill_by_path -TERM
+        sleep 3
+fi
+check_running
+RUNNING=$?
+if [ $RUNNING -gt 0 ]; then
+        echo "Stopping redis with KILL signal"
+        kill_by_path -KILL
+        sleep 1
+fi
+check_running
+RUNNING=$?
+if [ $RUNNING -gt 0 ]; then
+        echo "Failed to stop application"
+        exit 1
+else
+        echo "Application: redis stopped"
+fi
+if [ -d {{ redis_base_install_dir }}/redis-{{ redis_version }} ]; then
+        rm -r {{ redis_base_install_dir }}/redis-{{ redis_version }}
+        echo "Application directory: {{ redis_base_install_dir }}/redis-{{ redis_version }} deleted."
+else
+        echo "Application directory: {{ redis_base_install_dir }}/redis-{{ redis_version }} doesn't exist."
+fi
+
+if [ -d {{ redis_base_data_dir }}/redis ]; then
+        rm -r {{ redis_base_data_dir }}/redis
+        echo "Data directory: {{ redis_base_data_dir }}/redis deleted."
+else
+        echo "Data directory: {{ redis_base_data_dir }}/redis doesn't exist."
+fi
+
+/sbin/chkconfig --del redis
+echo "Service redis deleted with chkconfig."
+
+if [ -h {{ redis_base_install_dir }}/redis  ]; then
+        rm {{ redis_base_install_dir }}/redis
+        echo "Symlink: {{ redis_base_install_dir }}/redis deleted."
+else
+        echo "Symlink: {{ redis_base_install_dir }}/redis doesn't exist."
+fi
+
+if [ -f /etc/init.d/redis ]; then
+        rm /etc/init.d/redis
+        echo "Startup script: /etc/init.d/redis deleted."
+else
+        echo "Startup script: /etc/init.d/redis doesn't exist."
+fi
+rm -- "$0"
+echo "Deleted tear down script."
+exit 0
