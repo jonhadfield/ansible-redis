@@ -17,11 +17,11 @@
 # Check that networking is up.
 [ "$NETWORKING" = "no" ] && exit 0
  
-redis="{{ redis_base_install_dir }}/redis/redis-server"
+redis="{{ redis_base_install_dir }}/redis-{{ redis_version }}/redis-server"
 prog=$(basename $redis)
 CLIEXEC={{ redis_base_install_dir }}/redis/redis-cli
 REDISPORT=6379
-REDIS_CONF_FILE="{{ redis_base_install_dir }}/redis/redis.conf"
+REDIS_CONF_FILE="{{ redis_base_install_dir }}/redis-{{ redis_version }}/redis.conf"
  
 [ -f /etc/sysconfig/redis ] && . /etc/sysconfig/redis
  
