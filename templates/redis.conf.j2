@@ -419,11 +419,9 @@ maxmemory {{ redis_maxmemory }}
 #       getset mset msetnx exec sort
 #
 # The default is:
-#
+# maxmemory-policy volatile-lru
 {% if redis_maxmemory_policy is defined and redis_maxmemory_policy != None %}
 maxmemory-policy {{ redis_maxmemory_policy }}
-{% else %}
-# maxmemory-policy volatile-lru
 {% endif %}
 
 # LRU and minimal TTL algorithms are not precise algorithms but approximated
