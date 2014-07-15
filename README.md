@@ -16,6 +16,8 @@ Role Variables
     redis_base_install_dir: /apps       # Where redis will be installed
     redis_base_logs_dir: /logs          # Where redis' log directory will be created
     redis_base_data_dir: /data          # Where redis' data directory will be created
+    redis_maxmemory:                    # Maximum amount of data redis will store in memory
+    redis_maxmemory_policy:             # The policy to follow when maxmemory is reached 
 
 Dependencies
 ------------

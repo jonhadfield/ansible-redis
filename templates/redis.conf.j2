@@ -393,7 +393,11 @@ slave-priority 100
 # limit for maxmemory so that there is some free RAM on the system for slave
 # output buffers (but this is not needed if the policy is 'noeviction').
 #
+{% if redis_maxmemory is defined and redis_maxmemory != None %}
+maxmemory {{ redis_maxmemory }}
+{% else %}
 # maxmemory <bytes>
+{% endif %}
 
 # MAXMEMORY POLICY: how Redis will select what to remove when maxmemory
 # is reached. You can select among five behaviors:
@@ -416,7 +420,11 @@ slave-priority 100
 #
 # The default is:
 #
+{% if redis_maxmemory_policy is defined and redis_maxmemory_policy != None %}
+maxmemory-policy {{ redis_maxmemory_policy }}
+{% else %}
 # maxmemory-policy volatile-lru
+{% endif %}
 
 # LRU and minimal TTL algorithms are not precise algorithms but approximated
 # algorithms (in order to save memory), so you can select as well the sample
